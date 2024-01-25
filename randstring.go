@@ -1,63 +1,58 @@
 package randstring
 
 import (
-	crand "crypto/rand"
-	"math/big"
-	mrand "math/rand"
+	"math/rand"
 	"strings"
+	"time"
 )
 
 const (
-	// minimum length
-	minLength = 1
+  // minimum length
+  minLength = 1
 )
 
 var (
-	defaultCharSet = []string{
-		"abcdefghijklmnopqrstuvwxyz",
-		"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-		"0123456789",
-		"~!@#$%^&*()-_=+[{]};:\\|/"}
+  defaultCharSet = []string{
+    "abcdefghijklmnopqrstuvwxyz",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "0123456789",
+    "~!@#$%^&*()-_=+[{]};:\\|/"}
 )
 
-func Generate(length int, charSet ...string) (string, error) {
-	rands := ""
+func Generate(length int, charSet ...string) (result string) {
+  rnd := rand.NewSource(time.Now().Unix())
 
-	if len(charSet) == 0 || len(charSet[0]) == 0 {
-		charSet = defaultCharSet
-	}
-	if length < minLength {
-		length = minLength
-	}
+  if len(charSet) == 0 || len(charSet[0]) == 0 {
+    charSet = defaultCharSet
+  }
+  if length < minLength {
+    length = minLength
+  }
 
-	for _, s := range charSet {
-		if length == 0 {
-			break
-		}
-		r, err := crand.Int(crand.Reader, big.NewInt(int64(len(s))))
-		if err != nil {
-			return "", err
-		}
-		rands += string(s[r.Int64()])
-		length--
-	}
+  for _, s := range charSet {
+    if length == 0 {
+      break
+    }
 
-	s := strings.Join(charSet, "")
+    rndn := int(rnd.Int63())
+    result += string(s[rndn%len(s)])
+    length--
+  }
 
-	for length > 0 {
-		r, err := crand.Int(crand.Reader, big.NewInt(int64(len(s))))
-		if err != nil {
-			return "", err
-		}
-		rands += string(s[r.Int64()])
-		length--
-	}
+  s := strings.Join(charSet, "")
 
-	p := []byte(rands)
-	mrand.Shuffle(len(p), func(i, j int) {
-		p[i], p[j] = p[j], p[i]
-	})
-	rands = string(p)
+  for length > 0 {
+    rndn := int(rnd.Int63())
+    result += string(s[rndn%len(s)])
+    length--
+  }
 
-	return rands, nil
+  p := []byte(result)
+  rand.Shuffle(len(p), func(i, j int) {
+    p[i], p[j] = p[j], p[i]
+  })
+
+  result = string(p)
+
+  return
 }
