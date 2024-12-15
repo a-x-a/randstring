@@ -19,40 +19,42 @@ var (
     "~!@#$%^&*()-_=+[{]};:\\|/"}
 )
 
-func Generate(length int, charSet ...string) (result string) {
-  rnd := rand.NewSource(time.Now().Unix())
-
+func Generate(length int, charSet ...string) string {
   if len(charSet) == 0 || len(charSet[0]) == 0 {
     charSet = defaultCharSet
   }
+
   if length < minLength {
     length = minLength
   }
+
+  rnd := rand.NewSource(time.Now().Unix())
+  var sb strings.Builder
 
   for _, s := range charSet {
     if length == 0 {
       break
     }
 
+    n := len(s)
     rndn := int(rnd.Int63())
-    result += string(s[rndn%len(s)])
+    sb.WriteByte(s[rndn%n])
     length--
   }
 
   s := strings.Join(charSet, "")
 
+  n := len(s)
   for length > 0 {
     rndn := int(rnd.Int63())
-    result += string(s[rndn%len(s)])
+    sb.WriteByte(s[rndn%n])
     length--
   }
 
-  p := []byte(result)
+  p := []byte(sb.String())
   rand.Shuffle(len(p), func(i, j int) {
     p[i], p[j] = p[j], p[i]
   })
 
-  result = string(p)
-
-  return
+  return string(p)
 }
