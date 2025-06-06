@@ -7,8 +7,7 @@ import (
 )
 
 const (
-	// minimum length
-	minLength = 1
+	minLength = 1 // minimum length
 )
 
 var (
