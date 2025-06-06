@@ -6,55 +6,48 @@ import (
 	"time"
 )
 
-const (
-  // minimum length
-  minLength = 1
-)
+// RandStringGenerator - тип для генератора случайных строк.
+type RandStringGenerator func(length int) string
 
-var (
-  defaultCharSet = []string{
-    "abcdefghijklmnopqrstuvwxyz",
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    "0123456789",
-    "~!@#$%^&*()-_=+[{]};:\\|/"}
-)
+// New - создает новый генератор случайных строк на основе заданного набора символов
+// Параметры:
+// seed - набор символов, из которого будут генерироваться случайные строки
+// Возвращается:
+// функция-генератор, которая принимает длину строки и возвращает случайную строку.
+func New(seed string) RandStringGenerator {
+	// Проверяем, что seed не пустой
+	if seed == "" {
+		panic("seed cannot be empty")
+	}
 
-func Generate(length int, charSet ...string) string {
-  if len(charSet) == 0 || len(charSet[0]) == 0 {
-    charSet = defaultCharSet
-  }
+	// Преобразуем строку в массив рун для корректной работы с Unicode символами
+	runes := []rune(seed)
+	maxLength := len(runes)
 
-  if length < minLength {
-    length = minLength
-  }
+	// Инициализируем генератор случайных чисел текущим временем
+	rand.Seed(time.Now().UnixNano())
 
-  rnd := rand.NewSource(time.Now().Unix())
-  var sb strings.Builder
+	// Возвращаем замыкание (генератор)
+	return func(length int) string {
+		// Проверяем корректность длины
+		if length < 0 {
+			panic("length cannot be negative")
+		}
 
-  for _, s := range charSet {
-    if length == 0 {
-      break
-    }
+		// Для нулевой длины возвращаем пустую строку
+		if length == 0 {
+			return ""
+		}
 
-    n := len(s)
-    rndn := int(rnd.Int63())
-    sb.WriteByte(s[rndn%n])
-    length--
-  }
+		// Используем strings.Builder для эффективной конкатенации строк
+		var sb strings.Builder
+		sb.Grow(length) // Предварительное выделение памяти
 
-  s := strings.Join(charSet, "")
+		// Генерируем случайную строку заданной длины
+		for i := 0; i < length; i++ {
+			sb.WriteRune(runes[rand.Intn(maxLength)])
+		}
 
-  n := len(s)
-  for length > 0 {
-    rndn := int(rnd.Int63())
-    sb.WriteByte(s[rndn%n])
-    length--
-  }
-
-  p := []byte(sb.String())
-  rand.Shuffle(len(p), func(i, j int) {
-    p[i], p[j] = p[j], p[i]
-  })
-
-  return string(p)
+		return sb.String()
+	}
 }
