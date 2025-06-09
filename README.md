@@ -1,5 +1,7 @@
 # RANDSTRING
 
+[![golangci-lint](https://github.com/a-x-a/randstring/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/a-x-a/randstring/actions/workflows/golangci-lint.yml)
+
 ## Генератор случайных строк на основе заданного набора символов
 
 ### Описание
