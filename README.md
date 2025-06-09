@@ -12,14 +12,26 @@
 ### Использование
 
 ```go
-// Создаем генератор с буквами и цифрами
-generator := New("abcdefghijklmnopqrstuvwxyz0123456789")
+package main
 
-// Генерируем пароль длиной 8 символов
-password := generator(8)
+import (
+	"fmt"
 
-// Генерируем тестовые данные длиной 10 символов
-testData := generator(10)
+	"github.com/a-x-a/randstring"
+)
+
+func main() {
+	// Создаем генератор с буквами и цифрами
+	generator := randstring.New("abcdefghijklmnopqrstuvwxyz0123456789")
+
+	// Генерируем пароль длиной 8 символов
+	password := generator(8)
+	fmt.Println(password)
+
+	// Генерируем тестовые данные длиной 10 символов
+	testData := generator(10)
+	fmt.Println(testData)
+}
 ```
 
 ### Параметры
