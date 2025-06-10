@@ -22,15 +22,20 @@ import (
 
 func main() {
 	// Создаем генератор с буквами и цифрами
-	generator := randstring.New("abcdefghijklmnopqrstuvwxyz0123456789")
+	generator, err := randstring.NewGenerator("abcdefghijklmnopqrstuvwxyz0123456789")
+	if err != nil {
+		panic(err.Error())
+	}
 
 	// Генерируем пароль длиной 8 символов
-	password := generator(8)
-	fmt.Println(password)
+	if password, err := generator(8); err == nil {
+		fmt.Println(password)
+	}
 
 	// Генерируем тестовые данные длиной 10 символов
-	testData := generator(10)
-	fmt.Println(testData)
+	if testData, err := generator(10); err == nil {
+		fmt.Println(testData)
+	}
 }
 ```
 
