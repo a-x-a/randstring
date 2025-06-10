@@ -45,7 +45,7 @@ func NewGenerator(seed string) (Generator, error) {
 		sb.Grow(length) // Предварительное выделение памяти
 
 		// Генерируем случайную строку заданной длины
-		for _ = range length {
+		for range length {
 			sb.WriteRune(runes[r.Intn(maxLength)])
 		}
 
