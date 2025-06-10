@@ -14,16 +14,18 @@ const (
 )
 
 func BenchmarkRandStringGenerator(b *testing.B) {
-	generator := New(enCharacterSet)
+	generator, _ := NewGenerator(enCharacterSet)
 	for i := 0; i < b.N; i++ {
 		generator(16)
 	}
 }
 
 func TestNew_ValidInput(t *testing.T) {
-	generator := New(enCharacterSet)
-	result := generator(5)
+	generator,err := NewGenerator(enCharacterSet)
+	assert.NoError(t, err, "Должен быть успешный результат")
 
+	result, err := generator(5)
+	assert.NoError(t, err, "Должен быть успешный результат")
 	assert.Equal(t, 5, len(result), "Длина результата должна быть равна 5")
 
 	for _, char := range result {
@@ -33,28 +35,33 @@ func TestNew_ValidInput(t *testing.T) {
 }
 
 func TestNew_ZeroLength(t *testing.T) {
-	generator := New(enCharacterSet)
-	result := generator(0)
+	generator, err := NewGenerator(enCharacterSet)
+	assert.NoError(t, err, "Должен быть успешный результат")
 
+	result,err := generator(0)
+	assert.NoError(t, err, "Должен быть успешный результат")
 	assert.Empty(t, result, "При длине 0 должна возвращаться пустая строка")
 }
 
 func TestNew_NegativeLength(t *testing.T) {
-	generator := New(enCharacterSet)
+	generator, err := NewGenerator(enCharacterSet)
+	assert.NoError(t, err, "Должен быть успешный результат")
 
-	require.Panics(t, func() { generator(-5) },
-		"Должен быть вызван panic при отрицательной длине")
+	_, err = generator(-5)
+	assert.EqualError(t, err, ErrNegativeLength.Error())
 }
 
 func TestNew_EmptySeed(t *testing.T) {
-	require.Panics(t, func() { New("") },
-		"Должен быть вызван panic при пустой строке")
+	_, err := NewGenerator("")
+	assert.EqualError(t, err, ErrEmptySeed.Error())
 }
 
 func TestNew_UnicodeCharacters(t *testing.T) {
-	generator := New(ruCharacterSet)
-	result := generator(5)
+	generator, err := NewGenerator(ruCharacterSet)
+	require.NoError(t, err, "Должен быть успешный результат")
 
+	result, err := generator(5)
+	assert.NoError(t, err, "Должен быть успешный результат")
 	assert.Equal(t, 10, len(result), "Длина результата должна быть равна 10")
 
 	for _, char := range result {
@@ -64,12 +71,15 @@ func TestNew_UnicodeCharacters(t *testing.T) {
 }
 
 func TestNew_MultipleCalls(t *testing.T) {
-	generator := New(enCharacterSet)
+	generator, err := NewGenerator(enCharacterSet)
+	require.NoError(t, err, "Должен быть успешный результат")
+
 	results := make(map[string]struct{})
 
 	// Генерируем 100 строк
 	for i := 0; i < 100; i++ {
-		result := generator(5)
+		result, err := generator(5)
+		require.NoError(t, err, "Должен быть успешный результат")
 		results[result] = struct{}{}
 	}
 
@@ -78,11 +88,17 @@ func TestNew_MultipleCalls(t *testing.T) {
 }
 
 func TestNew_DifferentSeeds(t *testing.T) {
-	generator1 := New(enCharacterSet)
-	generator2 := New(ruCharacterSet)
+	generator1, err := NewGenerator(enCharacterSet)
+	require.NoError(t, err, "Должен быть успешный результат")
+	
+	generator2, err := NewGenerator(ruCharacterSet)
+	require.NoError(t, err, "Должен быть успешный результат")
 
-	result1 := generator1(5)
-	result2 := generator2(5)
+	result1, err := generator1(5)
+	require.NoError(t, err, "Должен быть успешный результат")
+
+	result2, err := generator2(5)
+	require.NoError(t, err, "Должен быть успешный результат")
 
 	assert.True(t, strings.ContainsAny(result1, enCharacterSet),
 		"Результат должен содержать символы из строки '%s': %s", enCharacterSet, result1)
@@ -92,20 +108,31 @@ func TestNew_DifferentSeeds(t *testing.T) {
 }
 
 func TestNew_SeedUniqueness(t *testing.T) {
-	generator1 := New(enCharacterSet)
-	generator2 := New(ruCharacterSet)
+	generator1, err := NewGenerator(enCharacterSet)
+	require.NoError(t, err, "Должен быть успешный результат")
+	
+	generator2, err := NewGenerator(ruCharacterSet)
+	require.NoError(t, err, "Должен быть успешный результат")
 
-	result1 := generator1(5)
-	result2 := generator2(5)
+	result1, err := generator1(5)
+	require.NoError(t, err, "Должен быть успешный результат")
+
+	result2, err := generator2(5)
+	require.NoError(t, err, "Должен быть успешный результат")
 
 	assert.NotEqual(t, result1, result2,
 		"Результаты должны отличаться при разных исходных строк")
 }
 
 func TestNew_Consistency(t *testing.T) {
-	generator := New(enCharacterSet)
-	result1 := generator(5)
-	result2 := generator(5)
+	generator, err := NewGenerator(enCharacterSet)
+	require.NoError(t, err, "Должен быть успешный результат")
+
+	result1, err := generator(5)
+	require.NoError(t, err, "Должен быть успешный результат")
+
+	result2, err := generator(5)
+	require.NoError(t, err, "Должен быть успешный результат")
 
 	assert.NotEqual(t, result1, result2,
 		"Результаты должны быть разными при одинаковых вызовах")
